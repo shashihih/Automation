@@ -37,6 +37,7 @@ public class BBCSteps {
         assertTrue(actualTitle.contains(expectedTitle));
 
         System.out.println("Test Passed");
+        System.out.println("git test");
     }
 
     @After
