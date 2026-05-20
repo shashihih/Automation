@@ -37,6 +37,7 @@ public class BBCSteps {
         assertTrue(actualTitle.contains(expectedTitle));
 
         System.out.println("test pass successfully");
+        System.out.println("for rebase check");
     }
 
     @After
