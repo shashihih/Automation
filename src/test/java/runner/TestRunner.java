@@ -11,5 +11,4 @@ import io.cucumber.junit.CucumberOptions;
         plugin = {"pretty"}
 )
 public class TestRunner {
-System.out.println("Build it")
 }
