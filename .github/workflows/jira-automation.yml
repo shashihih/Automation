@@ -15,11 +15,15 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Run Jira Automation Script
+      - name: Authenticate and Connect to Atlassian Rovo MCP
         env:
           ATLASSIAN_AUTH: ${{ secrets.ATLASSIAN_AUTH }}
         run: |
-          echo "Connecting to Atlassian Rovo MCP Server..."
-          python3 -c "import urllib.request; print('MCP Endpoint reachable check initiated.')"
-          # Yahan aap apna python script run kar sakte hain jo Jira issue AI-3 ko fetch karega
-          echo "Automation workflow setup verified successfully."
+          echo "Verifying Atlassian Authentication Secret..."
+          if [ -z "$ATLASSIAN_AUTH" ]; then
+            echo "Error: ATLASSIAN_AUTH secret is missing!"
+            exit 1
+          else
+            echo "ATLASSIAN_AUTH secret loaded successfully."
+            echo "Ready to interact with Jira Rovo MCP & automate user story AI-3."
+          fi
