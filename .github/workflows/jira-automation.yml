@@ -15,15 +15,60 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Authenticate and Connect to Atlassian Rovo MCP
+      - name: Install Dependencies
+        run: |
+          pip install requests
+
+      - name: Move GEN-1 from To Do to Done
         env:
           ATLASSIAN_AUTH: ${{ secrets.ATLASSIAN_AUTH }}
         run: |
-          echo "Verifying Atlassian Authentication Secret..."
-          if [ -z "$ATLASSIAN_AUTH" ]; then
-            echo "Error: ATLASSIAN_AUTH secret is missing!"
-            exit 1
-          else
-            echo "ATLASSIAN_AUTH secret loaded successfully."
-            echo "Ready to interact with Jira Rovo MCP & automate user story AI-3."
-          fi
+          python3 - << 'EOF'
+          import os
+          import requests
+          import json
+
+          auth = os.environ.get("ATLASSIAN_AUTH")
+          headers = {
+              "Authorization": f"Basic {auth}",
+              "Accept": "application/json",
+              "Content-Type": "application/json"
+          }
+
+          # Aapka Jira Cloud domain aur issue GEN-1 ka endpoint
+          issue_key = "GEN-1"
+          
+          # Pehle issue ki transitions check karte hain taaki 'Done' status ki ID mil sake
+          transitions_url = f"https://sharmat1611-1788416967727.atlassian.net/rest/api/3/issue/{issue_key}/transitions"
+          
+          print(f"Fetching available transitions for {issue_key}...")
+          res = requests.get(transitions_url, headers=headers)
+          
+          if res.status_code == 200:
+              transitions = res.json().get("transitions", [])
+              print(f"Available transitions: {[t['name'] for t in transitions]}")
+              
+              # 'Done' ya equivalent transition ID dhoondhna
+              done_transition_id = None
+              for t in transitions:
+                  if t['name'].lower() in ['done', 'complete', 'closed']:
+                      done_transition_id = t['id']
+                      break
+              
+              if done_transition_id:
+                  # Status update request to Done
+                  payload = {
+                      "transition": {
+                          "id": done_transition_id
+                      }
+                  }
+                  update_res = requests.post(transitions_url, headers=headers, json=payload)
+                  if update_res.status_code == 204:
+                      print(f"Successfully moved {issue_key} from To Do to Done!")
+                  else:
+                      print(f"Failed to update status. Response code: {update_res.status_code}, Body: {update_res.text}")
+              else:
+                  print("Could not find 'Done' transition in available list.")
+          else:
+              print(f"Failed to fetch transitions. Status: {res.status_code}, Body: {res.text}")
+          EOF
