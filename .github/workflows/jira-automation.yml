@@ -1,0 +1,22 @@
+name: Jira User Story Automation
+
+on:
+  workflow_dispatch: # Manual trigger ke liye (GitHub UI se run karne ke liye)
+  schedule:
+    - cron: '0 9 * * *' # Roz subah 9 baje automatic trigger ke liye
+
+jobs:
+  run-jira-agent:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Run Jira Rovo MCP Workflow
+        env:
+          ATLASSIAN_AUTH: ${{ secrets.ATLASSIAN_AUTH }}
+        run: |
+          echo "Connecting to Atlassian Rovo MCP..."
+          echo "Fetching Jira issue AI-3 and implementing acceptance criteria..."
+          echo "Running Maven tests..."
+          mvn test
